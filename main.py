@@ -24,7 +24,6 @@ async def command_start_handler(message: Message) -> None:
         leaderboard_text += f"{rank}. {html.bold(user.username or 'Unknown')} - {user.message_count} messages\n"
     await message.answer(leaderboard_text)
 
-
 @dp.message(Command(commands=['leaderboardweekly']))
 async def command_start_handler(message: Message) -> None:
     one_week_ago = datetime.now(timezone.utc) - timedelta(weeks=1)
