@@ -17,17 +17,21 @@ dp = Dispatcher()
 
 @dp.message(Command(commands=['leaderboard']))
 async def command_start_handler(message: Message) -> None:
-    top_users = session.query(UserMessage).order_by(desc(UserMessage.message_count)).limit(3).all()
+    chat_id = message.chat.id
+    top_users = session.query(UserMessage).filter(UserMessage.chat_id == chat_id).order_by(
+        desc(UserMessage.message_count)).limit(3).all()
 
     leaderboard_text = "Top 3 most messages of all time\n\n"
     for rank, user in enumerate(top_users, start=1):
         leaderboard_text += f"{rank}. {html.bold(user.username or 'Unknown')} - {user.message_count} messages\n"
     await message.answer(leaderboard_text)
 
+
 @dp.message(Command(commands=['leaderboardweekly']))
 async def command_start_handler(message: Message) -> None:
+    chat_id = message.chat.id
     one_week_ago = datetime.now(timezone.utc) - timedelta(weeks=1)
-    top_users = session.query(UserMessage).filter(UserMessage.last_message_date >= one_week_ago) \
+    top_users = session.query(UserMessage).filter(UserMessage.last_message_date >= one_week_ago,UserMessage.chat_id == chat_id) \
         .order_by(desc(UserMessage.message_count)).limit(3).all()
 
     leaderboard_text = "Top 3 most messages of the week\n\n"
@@ -40,9 +44,10 @@ async def command_start_handler(message: Message) -> None:
 async def echo_handler(message: Message) -> None:
     username = message.from_user.username
     user_id = message.from_user.id
-    current_message = session.query(UserMessage).filter_by(user_id=user_id).first()
+    chat_id = message.chat.id
+    current_message = session.query(UserMessage).filter(UserMessage.user_id==user_id, UserMessage.chat_id == chat_id).first()
     if current_message is None:
-        top_msg = UserMessage(user_id=user_id, username=username, message_count=1,
+        top_msg = UserMessage(user_id=user_id, username=username,chat_id=chat_id, message_count=1,
                               last_message_date=datetime.now(timezone.utc))
         session.add(top_msg)
         session.commit()

@@ -13,7 +13,7 @@ class UserMessage(Base):
     username = Column(String, nullable=False)
     message_count = Column(Integer, default=0)
     last_message_date = Column(DateTime, default=datetime.now(timezone.utc))
-
+    chat_id = Column(Integer, nullable=False)
 
 engine = create_engine('sqlite:///leaderboard.db')
 Base.metadata.create_all(engine)
